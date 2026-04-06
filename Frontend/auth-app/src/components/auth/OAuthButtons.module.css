@@ -1,0 +1,71 @@
+.container {
+  margin-top: 8px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(0,0,0,0.12) 0,
+    rgba(0,0,0,0.12) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.dividerText {
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oauthBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.oauthBtn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.oauthBtn:hover {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.oauthBtn:active {
+  transform: translateY(0);
+}

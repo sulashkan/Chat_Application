@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f0f5ff 0%, #e8f0fe 40%, #f5f0ff 100%);
+  font-family: 'DM Sans', sans-serif;
+  padding: 32px 24px;
+  position: relative;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(99,102,241,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(16,185,129,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  animation: fadeDown 0.4s ease both;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+.greeting {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.userName {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.8);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.logoutBtn:hover {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+/* Card */
+.card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.label {
+  font-size: 11.5px;
+  color: #9ca3af;
+  margin: 0;
+  font-family: 'DM Mono', monospace;
+  background: rgba(0,0,0,0.04);
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* Token */
+.tokenBox {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 12px 14px;
+  overflow: hidden;
+}
+
+.tokenText {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  word-break: break-all;
+  white-space: pre-wrap;
+  display: block;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.copyBtn:hover {
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+/* Protected data */
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(99,102,241,0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.responseBox {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 14px;
+  overflow: auto;
+  max-height: 150px;
+}
+
+.jsonText {
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px;
+  color: #7dd3fc;
+  margin: 0;
+  white-space: pre;
+}
+
+.errorText {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: rgba(16,185,129,0.1);
+  color: #059669;
+  border: 1.5px solid rgba(16,185,129,0.2);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: rgba(16,185,129,0.15);
+  transform: translateY(-1px);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Profile */
+.profileGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.profileItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profileLabel {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.profileValue {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background: rgba(16,185,129,0.1);
+  color: #059669;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .profileGrid { grid-template-columns: 1fr 1fr; }
+  .header { flex-wrap: wrap; gap: 12px; }
+}
