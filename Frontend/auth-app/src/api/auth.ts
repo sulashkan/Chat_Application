@@ -1,5 +1,6 @@
 import apiClient from './client';
-import type { AuthResponse, LoginPayload, RegisterPayload, OAuthProvider } from '../types/auth';
+import type { AxiosResponse } from 'axios';
+import type { AuthResponse, LoginPayload, RegisterPayload, OAuthProvider, User } from '../types/auth';
 
 
 export const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
@@ -14,9 +15,8 @@ export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
 };
 
 
-export const getUsers = async (): Promise<{ message?: string; users: unknown[] }> => {
-  const { data } = await apiClient.get('/api/users');
-  return { users: data, message: 'Users fetched successfully' };
+export const getUsers = async (): Promise<AxiosResponse<User[]>> => {
+  return apiClient.get('/api/users');
 };
 
 
@@ -34,4 +34,16 @@ export const initiateOAuth = (provider: OAuthProvider): void => {
 
 export const logout = (): void => {
   localStorage.removeItem('auth_token');
+};
+
+export const getMessages = (chatId: string) => {
+  return apiClient.get(`/api/messages/${chatId}`);
+};
+
+export const getMyChats = () => {
+  return apiClient.get('/api/chats');
+};
+
+export const getOrCreatePrivateChat = (userId: string) => {
+  return apiClient.post('/api/chats/private', { userId });
 };

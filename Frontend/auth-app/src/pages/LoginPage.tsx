@@ -53,7 +53,7 @@ export const LoginPage = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const ok = await handleLogin({ email, password });
-    if (ok) navigate('/dashboard');
+    if (ok) navigate('/');
   };
 
   return (

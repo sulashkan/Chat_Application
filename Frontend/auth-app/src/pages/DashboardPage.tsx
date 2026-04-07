@@ -1,56 +1,10 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getUsers, getProtectedData } from '../api/auth';
 import styles from './DashboardPage.module.css';
 
 export const DashboardPage = () => {
-  const { user, token, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [protectedData, setProtectedData] = useState<{ message: string; data: unknown } | null>(null);
-  const [users, setUsers] = useState<Array<{ id?: string; name?: string; email?: string }>>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    fetchProtected();
-    fetchUsers();
-  }, []);
-
-  const fetchProtected = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getProtectedData();
-      setProtectedData(data);
-    } catch {
-      setError('Failed to fetch protected data.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getUsers();
-      setUsers(response.users as Array<{ id?: string; name?: string; email?: string }>);
-    } catch {
-      setError('Failed to fetch user list.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const copyToken = () => {
-    if (token) {
-      navigator.clipboard.writeText(token);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const handleLogout = () => {
     logout();

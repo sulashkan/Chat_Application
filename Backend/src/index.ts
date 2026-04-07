@@ -11,6 +11,9 @@ import cors from "cors";
 import connectDB from "./config/db";
 import authRouter from "./routes/auth.router";
 import userRouter from "./routes/user.router";
+import chatRouter from "./routes/chat.router";
+import socketServer from "./socket";
+import messageRouter from "./routes/message.router"
 
 const app = express();
 const server = http.createServer(app);
@@ -37,11 +40,15 @@ app.use(
   })
 );
 
+socketServer(io);
+
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
+app.use("/api/messages", messageRouter);
+app.use("/api/chats", chatRouter);
 
 
 const PORT = process.env.PORT || 8000;
