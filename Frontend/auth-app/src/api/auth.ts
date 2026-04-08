@@ -36,6 +36,18 @@ export const logout = (): void => {
   localStorage.removeItem('auth_token');
 };
 
+export const sendUserRequest = (userId: string) => {
+  return apiClient.post(`/api/users/request/${userId}`);
+};
+
+export const acceptUserRequest = (userId: string) => {
+  return apiClient.post(`/api/users/request/${userId}/accept`);
+};
+
+export const rejectUserRequest = (userId: string) => {
+  return apiClient.post(`/api/users/request/${userId}/reject`);
+};
+
 export const getMessages = (chatId: string) => {
   return apiClient.get(`/api/messages/${chatId}`);
 };

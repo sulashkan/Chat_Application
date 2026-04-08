@@ -5,6 +5,12 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  contacts?: string[];
+  sentRequests?: string[];
+  receivedRequests?: string[];
+  isContact?: boolean;
+  requestSent?: boolean;
+  requestReceived?: boolean;
 }
 
 export interface AuthResponse {

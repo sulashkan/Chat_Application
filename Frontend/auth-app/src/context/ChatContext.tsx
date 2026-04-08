@@ -5,9 +5,11 @@ interface ChatContextValue {
   activeChat: Chat | null;
   setActiveChat: (chat: Chat | null) => void;
   onlineUsers: string[];
-  setOnlineUsers: (ids: string[]) => void;
+  setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
   users: User[];
-  setUsers: (u: User[]) => void;
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  typingUsers: string[];
+  setTypingUsers: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -16,9 +18,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
   return (
-    <ChatContext.Provider value={{ activeChat, setActiveChat, onlineUsers, setOnlineUsers, users, setUsers }}>
+    <ChatContext.Provider value={{ activeChat, setActiveChat, onlineUsers, setOnlineUsers, users, setUsers, typingUsers, setTypingUsers }}>
       {children}
     </ChatContext.Provider>
   );

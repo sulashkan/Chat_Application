@@ -8,6 +8,7 @@ export interface Message {
   text: string;
   createdAt: string;
   updatedAt: string;
+  seen?: boolean;
 }
 
 export interface Chat {

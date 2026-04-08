@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUsers, getOrCreatePrivateChat } from '../../api';
+import { getUsers, getOrCreatePrivateChat, sendUserRequest, acceptUserRequest, rejectUserRequest } from '../../api';
 import { useChatCtx } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../UI/Avatar';
@@ -36,6 +36,10 @@ export const UserList = ({ onClose }: UserListProps) => {
   const handleOpenChat = async (userId: string) => {
     setOpening(userId);
     try {
+      const user = allUsers.find(u => u._id === userId);
+      if (!user?.isContact) {
+        return;
+      }
       const { data: chat } = await getOrCreatePrivateChat(userId);
       const otherUser = allUsers.find(u => u._id === userId);
       setActiveChat({ ...chat, otherUser });
@@ -88,11 +92,9 @@ export const UserList = ({ onClose }: UserListProps) => {
           </div>
         ) : (
           filtered.map(u => (
-            <button
+            <div
               key={u._id}
-              onClick={() => handleOpenChat(u._id)}
-              disabled={opening === u._id}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] transition-colors text-left group"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] transition-colors text-left"
             >
               <Avatar
                 name={u.name}
@@ -103,10 +105,90 @@ export const UserList = ({ onClose }: UserListProps) => {
                 <p className="text-[#e9edef] text-[15px] font-medium truncate">{u.name}</p>
                 <p className="text-[#8696a0] text-[13px] truncate">{u.email}</p>
               </div>
-              {opening === u._id && (
-                <div className="w-4 h-4 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
-              )}
-            </button>
+              <div className="flex items-center gap-2">
+                {u.isContact ? (
+                  <button
+                    onClick={() => handleOpenChat(u._id)}
+                    disabled={opening === u._id}
+                    className="px-3 py-1 rounded-full bg-[#00a884] text-white text-xs font-semibold"
+                  >
+                    Chat
+                  </button>
+                ) : u.requestReceived ? (
+                  <>
+                    <button
+                      onClick={async () => {
+                        setOpening(u._id);
+                        try {
+                          await acceptUserRequest(u._id);
+                          setAllUsers((prev) =>
+                            prev.map((item) =>
+                              item._id === u._id
+                                ? { ...item, isContact: true, requestReceived: false, requestSent: false }
+                                : item
+                            )
+                          );
+                        } finally {
+                          setOpening(null);
+                        }
+                      }}
+                      disabled={opening === u._id}
+                      className="px-3 py-1 rounded-full bg-[#00a884] text-white text-xs font-semibold"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setOpening(u._id);
+                        try {
+                          await rejectUserRequest(u._id);
+                          setAllUsers((prev) =>
+                            prev.map((item) =>
+                              item._id === u._id
+                                ? { ...item, requestReceived: false, requestSent: false }
+                                : item
+                            )
+                          );
+                        } finally {
+                          setOpening(null);
+                        }
+                      }}
+                      disabled={opening === u._id}
+                      className="px-3 py-1 rounded-full bg-[#374151] text-[#e9edef] text-xs font-semibold"
+                    >
+                      Reject
+                    </button>
+                  </>
+                ) : u.requestSent ? (
+                  <button
+                    disabled
+                    className="px-3 py-1 rounded-full bg-[#6b7280] text-[#e9edef] text-xs font-semibold"
+                  >
+                    Requested
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setOpening(u._id);
+                      try {
+                        await sendUserRequest(u._id);
+                        setAllUsers((prev) =>
+                          prev.map((item) =>
+                            item._id === u._id ? { ...item, requestSent: true } : item
+                          )
+                        );
+                      } finally {
+                        setOpening(null);
+                      }
+                    }}
+                    disabled={opening === u._id}
+                    className="px-3 py-1 rounded-full bg-[#00a884] text-white text-xs font-semibold"
+                  >
+                    Add
+                  </button>
+                )}
+              </div>
+            </div>
           ))
         )}
       </div>

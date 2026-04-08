@@ -6,6 +6,9 @@ export interface IUser extends Document {
   password?: string;
   provider?: string;
   providerId?: string;
+  contacts: string[];
+  sentRequests: string[];
+  receivedRequests: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +35,18 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     providerId: {
       type: String,
       required: false,
+    },
+    contacts: {
+      type: [{ type: String }],
+      default: [],
+    },
+    sentRequests: {
+      type: [{ type: String }],
+      default: [],
+    },
+    receivedRequests: {
+      type: [{ type: String }],
+      default: [],
     },
   },
   { timestamps: true },

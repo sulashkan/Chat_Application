@@ -1,4 +1,7 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useCallback, useRef } from 'react';
+import { sendTyping } from '../../hooks/useSocket';
+import { useChatCtx } from '../../context/ChatContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface MessageInputProps {
   onSend: (text: string) => void;
@@ -7,6 +10,38 @@ interface MessageInputProps {
 
 export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
   const [text, setText] = useState('');
+  const { activeChat } = useChatCtx();
+  const { user } = useAuth();
+  const typingTimeoutRef = useRef<number>();
+
+  const handleTyping = useCallback(() => {
+    if (!activeChat || !text.trim()) return;
+    
+    // Get the current user ID
+    const currentUserId = user?._id || user?.id;
+    // Get the other user in the chat
+    const otherUser = activeChat.members.find(id => id !== currentUserId);
+    if (otherUser) {
+      sendTyping(otherUser);
+    }
+  }, [activeChat, text, user]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Send typing indicator
+    handleTyping();
+    
+    // Set timeout to stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      // Could emit stop_typing here if needed
+    }, 2000);
+  };
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -45,7 +80,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
       <div className="flex-1 bg-[#2a3942] rounded-lg overflow-hidden">
         <textarea
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKey}
           placeholder="Type a message"
           rows={1}

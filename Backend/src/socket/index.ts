@@ -82,15 +82,15 @@ const socketServer = (io: Server) => {
     });
 
     // Mark messages as seen
-    socket.on("mark_seen", async ({ from }) => {
+    socket.on("mark_seen", async ({ from, chatId }) => {
       await Message.updateMany(
-        { senderId: from, receiverId: userId, seen: false },
+        { chatId, sender: from, seen: false },
         { seen: true }
       );
 
       const senderSocketId = onlineUsers.get(from);
       if (senderSocketId) {
-        io.to(senderSocketId).emit("messages_seen");
+        io.to(senderSocketId).emit("messages_seen", { chatId });
       }
     });
 

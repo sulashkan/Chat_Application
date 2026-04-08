@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Chat from "../models/chat.model";
 import Message from "../models/message.model";
+import User from "../models/user.model";
 
 export const getChats = async (req: any, res: Response): Promise<void> => {
   try {
@@ -36,6 +37,20 @@ export const getOrCreatePrivateChat = async (req: any, res: Response): Promise<v
 
     if (otherUserId === userId) {
       res.status(400).json({ message: "Cannot create a private chat with yourself" });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    const otherUser = await User.findById(otherUserId);
+
+    if (!user || !otherUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const isMutualContact = user.contacts.includes(otherUserId) && otherUser.contacts.includes(userId);
+    if (!isMutualContact) {
+      res.status(403).json({ message: "Chat not allowed until request is accepted" });
       return;
     }
 

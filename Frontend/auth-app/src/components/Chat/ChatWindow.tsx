@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { getMessages } from '../../api';
-import { sendMessage } from '../../hooks/useSocket';
+import { sendMessage, markMessagesSeen, useSocket } from '../../hooks/useSocket';
 import { useChatCtx } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { MessageBubble } from './MessageBubble';
@@ -30,11 +30,24 @@ const groupByDate = (messages: Message[]) => {
 };
 
 export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
-  const { activeChat } = useChatCtx();
+  const { activeChat, typingUsers } = useChatCtx();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const myId = (user?._id || user?.id)?.toString();
+
+  // Handle socket events
+  useSocket({
+    onMessage: (_msg: Message) => {
+      // This is handled by the incomingMessage prop
+    },
+    onMessagesSeen: (chatId: string) => {
+      if (activeChat?._id !== chatId) return;
+      setMessages(prev => prev.map(msg => ({ ...msg, seen: true })));
+    },
+  });
 
   // Load messages when chat changes
   useEffect(() => {
@@ -44,17 +57,30 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
     setMessages([]);
 
     getMessages(activeChat._id)
-      .then(res => setMessages(res.data))
+      .then(res => {
+        setMessages(res.data);
+        // Mark messages as seen when chat is opened
+        const otherUser = activeChat.members.find(id => id !== myId);
+        if (otherUser) {
+          markMessagesSeen(otherUser, activeChat._id);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [activeChat?._id]);
+  }, [activeChat?._id, myId]);
 
   // Append incoming real-time message
   useEffect(() => {
     if (!incomingMessage) return;
     if (incomingMessage.chatId !== activeChat?._id) return;
     setMessages(prev => [...prev, incomingMessage]);
-  }, [incomingMessage]);
+    
+    // Mark the new message as seen
+    const otherUser = activeChat?.members.find(id => id !== myId);
+    if (otherUser) {
+      markMessagesSeen(otherUser, activeChat._id);
+    }
+  }, [incomingMessage, activeChat, myId]);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -149,8 +175,7 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
                 <DateDivider date={group.messages[0].createdAt} />
                 <div className="flex flex-col gap-1">
                   {group.messages.map((msg, idx) => {
-                    const isMine = msg.sender === user?._id;
-                    const isLast = idx === group.messages.length - 1 ||
+                      const isMine = msg.sender?.toString() === myId;                    const isLast = idx === group.messages.length - 1 ||
                       group.messages[idx + 1]?.sender !== msg.sender;
                     return (
                       <MessageBubble
@@ -168,6 +193,18 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Typing indicator */}
+      {typingUsers.length > 0 && (
+        <div className="px-4 py-2 text-[#8696a0] text-sm flex items-center gap-2">
+          <div className="flex gap-1">
+            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+          {typingUsers.length === 1 ? 'typing...' : `${typingUsers.length} people typing...`}
+        </div>
+      )}
 
       {/* Input */}
       <MessageInput onSend={handleSend} />
