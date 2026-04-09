@@ -27,7 +27,7 @@ const allowedOrigins = Array.from(
     [
       "http://localhost:3000",
       "http://localhost:5173",
-      "https://chat-application-xk23.vercel.app",
+      "https://chat-application-mu-ashy.vercel.app",
     ]
       .flatMap((value) => (value ? value.split(",") : []))
       .map((value) => value.trim())
