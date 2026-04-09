@@ -27,10 +27,7 @@ const allowedOrigins = Array.from(
     [
       "http://localhost:3000",
       "http://localhost:5173",
-      process.env.FRONTEND_URL,
-      process.env.CLIENT_URL,
-      process.env.CORS_ORIGINS,
-      "https://chat-application-eight-sage.vercel.app",
+      "https://chat-application-xk23.vercel.app",
     ]
       .flatMap((value) => (value ? value.split(",") : []))
       .map((value) => value.trim())
