@@ -27,7 +27,11 @@ connectDB();
 app.use(express.json());
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://chat-application-ot68.vercel.app"
+],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -57,23 +61,25 @@ app.use("/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 8000;
 
-const startServer = (port: string | number) => {
-  const portNum = typeof port === "string" ? parseInt(port, 10) : port;
-  server.listen(portNum, () => {
-    console.log(`Server running on ${portNum}`);
-  });
-};
+// const startServer = (port: string | number) => {
+//   const portNum = typeof port === "string" ? parseInt(port, 10) : port;
+//   server.listen(portNum, () => {
+//     console.log(`Server running on ${portNum}`);
+//   });
+// };
 
-server.on("error", (err: NodeJS.ErrnoException) => {
-  if (err.code === "EADDRINUSE") {
-    const address = server.address();
-    const currentPort = (typeof address === "object" && address) ? address.port : 8000;
-    console.log(`Port ${currentPort} is busy, trying port ${currentPort + 1}`);
-    server.listen(currentPort + 1);
-  } else {
-    console.error(err);
-    process.exit(1);
-  }
+// server.on("error", (err: NodeJS.ErrnoException) => {
+//   if (err.code === "EADDRINUSE") {
+//     const address = server.address();
+//     const currentPort = (typeof address === "object" && address) ? address.port : 8000;
+//     console.log(`Port ${currentPort} is busy, trying port ${currentPort + 1}`);
+//     server.listen(currentPort + 1);
+//   } else {
+//     console.error(err);
+//     process.exit(1);
+//   }
+// });
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-startServer(PORT);
