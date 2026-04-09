@@ -1,5 +1,5 @@
 const BASE_URL =
-  (import.meta as any).env.VITE_API_URL || "http://localhost:5000";
+  ((import.meta as any).env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 export const getMediaUrl = (url: string) => {
   if (url.startsWith("http")) return url;

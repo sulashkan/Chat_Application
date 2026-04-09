@@ -18,28 +18,55 @@ import uploadRouter from "./routes/upload.routes";
 
 const app = express();
 const server = http.createServer(app);
+app.set("trust proxy", 1);
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "https://chat-application-eight-sage.vercel.app", // update with your current Vercel URL
-];
+const normalizeOrigin = (value: string): string => value.trim().replace(/\/$/, "");
 
-app.use(cors({
-  origin: allowedOrigins,
+const allowedOrigins = Array.from(
+  new Set(
+    [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+      process.env.CLIENT_URL,
+      process.env.CORS_ORIGINS,
+      "https://chat-application-eight-sage.vercel.app",
+    ]
+      .flatMap((value) => (value ? value.split(",") : []))
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map(normalizeOrigin)
+  )
+);
+
+const corsOptions: cors.CorsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(normalizeOrigin(origin))) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  },
   credentials: true,
-}));
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 socketServer(io);
-
-connectDB();
 
 app.use(express.json());
 
@@ -61,9 +88,19 @@ app.use("/api/chats", chatRouter);
 app.use("/api/uploads", uploadRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/uploads", express.static("uploads"));
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true });
+});
 
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = async (): Promise<void> => {
+  await connectDB();
+
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Allowed CORS origins: ${allowedOrigins.join(", ")}`);
+  });
+};
+
+void startServer();

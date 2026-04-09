@@ -28,7 +28,10 @@ export const getProtectedData = async (): Promise<{ message: string; data: unkno
 
 
 export const initiateOAuth = (provider: OAuthProvider): void => {
-  const BASE_URL = (import.meta as { env: Record<string, string | undefined> }).env.VITE_API_URL || 'http://localhost:5000';
+  const BASE_URL = (
+    (import.meta as { env: Record<string, string | undefined> }).env.VITE_API_URL ||
+    'http://localhost:5000'
+  ).replace(/\/$/, '');
   window.location.href = `${BASE_URL}/api/auth/${provider}`;
 };
 
