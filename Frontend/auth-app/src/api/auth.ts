@@ -1,4 +1,5 @@
 import apiClient from './client';
+import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import type { AuthResponse, LoginPayload, RegisterPayload, OAuthProvider, User } from '../types/auth';
 
@@ -46,6 +47,42 @@ export const acceptUserRequest = (userId: string) => {
 
 export const rejectUserRequest = (userId: string) => {
   return apiClient.post(`/api/users/request/${userId}/reject`);
+};
+
+export const cancelUserRequest = (userId: string) => {
+  return apiClient.post(`/api/users/request/${userId}/cancel`).catch(async (err) => {
+    if (!axios.isAxiosError(err) || err.response?.status !== 404) {
+      return Promise.reject(err);
+    }
+
+    try {
+      return await apiClient.post(`/api/users/request/${userId}/take-back`);
+    } catch (takeBackErr) {
+      if (!axios.isAxiosError(takeBackErr) || takeBackErr.response?.status !== 404) {
+        return Promise.reject(takeBackErr);
+      }
+      return apiClient.post(`/api/users/request/${userId}/reject`);
+    }
+  });
+};
+
+
+export const removeUserContact = (userId: string) => {
+  return apiClient.post(`/api/users/contact/${userId}/remove`).catch((err) => {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      return apiClient.post(`/api/users/request/${userId}/remove`);
+    }
+    return Promise.reject(err);
+  });
+};
+
+export const blockUserContact = (userId: string) => {
+  return apiClient.post(`/api/users/contact/${userId}/block`).catch((err) => {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      return apiClient.post(`/api/users/request/${userId}/block`);
+    }
+    return Promise.reject(err);
+  });
 };
 
 export const getMessages = (chatId: string) => {

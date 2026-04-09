@@ -11,6 +11,8 @@ export interface User {
   isContact?: boolean;
   requestSent?: boolean;
   requestReceived?: boolean;
+  isBlocked?: boolean;
+  isBlockedBy?: boolean;
 }
 
 export interface AuthResponse {

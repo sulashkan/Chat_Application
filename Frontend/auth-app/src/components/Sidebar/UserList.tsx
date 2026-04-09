@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { getUsers, getOrCreatePrivateChat, sendUserRequest, acceptUserRequest, rejectUserRequest } from '../../api';
+import {
+  getUsers,
+  getOrCreatePrivateChat,
+  sendUserRequest,
+  acceptUserRequest,
+  rejectUserRequest,
+  cancelUserRequest,
+  removeUserContact,
+  blockUserContact,
+} from '../../api';
 import { useChatCtx } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../UI/Avatar';
@@ -49,6 +58,14 @@ export const UserList = ({ onClose }: UserListProps) => {
     } finally {
       setOpening(null);
     }
+  };
+
+  const updateUsersState = (updater: (prev: User[]) => User[]) => {
+    setAllUsers((prev) => {
+      const next = updater(prev);
+      setUsers(next);
+      return next;
+    });
   };
 
   return (
@@ -107,13 +124,68 @@ export const UserList = ({ onClose }: UserListProps) => {
               </div>
               <div className="flex items-center gap-2">
                 {u.isContact ? (
-                  <button
-                    onClick={() => handleOpenChat(u._id)}
-                    disabled={opening === u._id}
-                    className="px-3 py-1 rounded-full bg-[#00a884] text-white text-xs font-semibold"
-                  >
-                    Chat
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleOpenChat(u._id)}
+                      disabled={opening === u._id}
+                      className="px-3 py-1 rounded-full bg-[#00a884] text-white text-xs font-semibold"
+                    >
+                      Chat 
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setOpening(u._id);
+                        try {
+                          await removeUserContact(u._id);
+                          updateUsersState((prev) =>
+                            prev.map((item) =>
+                              item._id === u._id
+                                ? {
+                                    ...item,
+                                    isContact: false,
+                                    requestSent: false,
+                                    requestReceived: false,
+                                  }
+                                : item
+                            )
+                          );
+                        } finally {
+                          setOpening(null);
+                        }
+                      }}
+                      disabled={opening === u._id}
+                      className="px-3 py-1 rounded-full bg-[#374151] text-[#e9edef] text-xs font-semibold"
+                    >
+                      Remove
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setOpening(u._id);
+                        try {
+                          await blockUserContact(u._id);
+                          updateUsersState((prev) =>
+                            prev.map((item) =>
+                              item._id === u._id
+                                ? {
+                                    ...item,
+                                    isContact: false,
+                                    requestSent: false,
+                                    requestReceived: false,
+                                    isBlocked: true,
+                                  }
+                                : item
+                            )
+                          );
+                        } finally {
+                          setOpening(null);
+                        }
+                      }}
+                      disabled={opening === u._id}
+                      className="px-3 py-1 rounded-full bg-[#7f1d1d] text-[#fee2e2] text-xs font-semibold"
+                    >
+                      Block
+                    </button>
+                  </>
                 ) : u.requestReceived ? (
                   <>
                     <button
@@ -121,7 +193,7 @@ export const UserList = ({ onClose }: UserListProps) => {
                         setOpening(u._id);
                         try {
                           await acceptUserRequest(u._id);
-                          setAllUsers((prev) =>
+                          updateUsersState((prev) =>
                             prev.map((item) =>
                               item._id === u._id
                                 ? { ...item, isContact: true, requestReceived: false, requestSent: false }
@@ -142,7 +214,7 @@ export const UserList = ({ onClose }: UserListProps) => {
                         setOpening(u._id);
                         try {
                           await rejectUserRequest(u._id);
-                          setAllUsers((prev) =>
+                          updateUsersState((prev) =>
                             prev.map((item) =>
                               item._id === u._id
                                 ? { ...item, requestReceived: false, requestSent: false }
@@ -161,18 +233,41 @@ export const UserList = ({ onClose }: UserListProps) => {
                   </>
                 ) : u.requestSent ? (
                   <button
-                    disabled
-                    className="px-3 py-1 rounded-full bg-[#6b7280] text-[#e9edef] text-xs font-semibold"
+                    onClick={async () => {
+                      setOpening(u._id);
+                      try {
+                        await cancelUserRequest(u._id);
+                        updateUsersState((prev) =>
+                          prev.map((item) =>
+                            item._id === u._id
+                              ? { ...item, requestSent: false, requestReceived: false }
+                              : item
+                          )
+                        );
+                      } finally {
+                        setOpening(null);
+                      }
+                    }}
+                    disabled={opening === u._id}
+                    className="px-3 py-1 rounded-full bg-[#4b5563] text-[#e9edef] text-xs font-semibold"
                   >
-                    Requested
+                    Take back
                   </button>
+                ) : u.isBlocked ? (
+                  <span className="px-3 py-1 rounded-full bg-[#7f1d1d] text-[#fee2e2] text-xs font-semibold">
+                    Blocked
+                  </span>
+                ) : u.isBlockedBy ? (
+                  <span className="px-3 py-1 rounded-full bg-[#1f2937] text-[#9ca3af] text-xs font-semibold">
+                    Unavailable
+                  </span>
                 ) : (
                   <button
                     onClick={async () => {
                       setOpening(u._id);
                       try {
                         await sendUserRequest(u._id);
-                        setAllUsers((prev) =>
+                        updateUsersState((prev) =>
                           prev.map((item) =>
                             item._id === u._id ? { ...item, requestSent: true } : item
                           )

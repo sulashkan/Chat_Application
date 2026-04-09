@@ -5,7 +5,9 @@ export interface Message {
   _id: string;
   chatId: string;
   sender: string;
-  text: string;
+  text?: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video' | 'file';
   createdAt: string;
   updatedAt: string;
   seen?: boolean;

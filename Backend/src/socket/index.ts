@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import onlineUsers from "./onlineUsers";
 import Message from "../models/message.model";
 import Chat from "../models/chat.model";
+import User from "../models/user.model";
 
 interface JwtPayload {
   id: string;
@@ -42,6 +43,25 @@ const socketServer = (io: Server) => {
    socket.on("send_message", async ({ chatId, text, mediaUrl }) => {
   const senderId = userId;
 
+  const chat = await Chat.findById(chatId);
+  if (!chat || !chat.members.includes(senderId)) return;
+
+  if (!chat.isGroup && chat.members.length === 2) {
+    const otherUserId = chat.members.find((memberId: string) => memberId !== senderId);
+    const sender = await User.findById(senderId).lean();
+    const otherUser = otherUserId ? await User.findById(otherUserId).lean() : null;
+
+    if (!sender || !otherUser || !otherUserId) return;
+
+    const senderContacts = sender.contacts ?? [];
+    const otherContacts = otherUser.contacts ?? [];
+    const senderBlocked = sender.blockedUsers ?? [];
+    const otherBlocked = otherUser.blockedUsers ?? [];
+    const isMutualContact = senderContacts.includes(otherUserId) && otherContacts.includes(senderId);
+    const eitherBlocked = senderBlocked.includes(otherUserId) || otherBlocked.includes(senderId);
+    if (!isMutualContact || eitherBlocked) return;
+  }
+
   // Save message
   const message = await Message.create({
     chatId,
@@ -54,11 +74,6 @@ const socketServer = (io: Server) => {
   await Chat.findByIdAndUpdate(chatId, {
     lastMessage: message._id,
   });
-
-  //  Get chat members
-  const chat = await Chat.findById(chatId);
-
-  if (!chat) return;
 
   // Emit to all members except sender
   chat.members.forEach((memberId: string) => {
@@ -73,6 +88,7 @@ const socketServer = (io: Server) => {
 
     //  Typing indicator
     socket.on("typing", ({ to }) => {
+      if (to === userId) return;
       const receiverSocketId = onlineUsers.get(to);
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("show_typing", {

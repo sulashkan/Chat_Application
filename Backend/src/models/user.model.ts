@@ -9,6 +9,7 @@ export interface IUser extends Document {
   contacts: string[];
   sentRequests: string[];
   receivedRequests: string[];
+  blockedUsers: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +46,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
       default: [],
     },
     receivedRequests: {
+      type: [{ type: String }],
+      default: [],
+    },
+    blockedUsers: {
       type: [{ type: String }],
       default: [],
     },

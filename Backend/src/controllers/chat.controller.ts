@@ -6,11 +6,27 @@ import User from "../models/user.model";
 export const getChats = async (req: any, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
+    const currentUser = await User.findById(userId).lean();
+
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
     const chats = await Chat.find({ members: userId }).sort({ updatedAt: -1 }).lean();
+    const visibleChats = chats.filter((chat) => {
+      if (chat.isGroup || chat.members.length !== 2) return true;
+      const otherUserId = chat.members.find((id) => id !== userId);
+      if (!otherUserId) return false;
+
+      const myContacts = currentUser.contacts ?? [];
+      const blockedByMe = (currentUser.blockedUsers ?? []).includes(otherUserId);
+      const isMutualContact = myContacts.includes(otherUserId);
+      return isMutualContact && !blockedByMe;
+    });
       
     const enrichedChats = await Promise.all(
-      chats.map(async (chat) => {
+      visibleChats.map(async (chat) => {
         if (chat.lastMessage) {
           const message = await Message.findById(chat.lastMessage).lean();
           return { ...chat, lastMessage: message };
@@ -48,9 +64,18 @@ export const getOrCreatePrivateChat = async (req: any, res: Response): Promise<v
       return;
     }
 
-    const isMutualContact = user.contacts.includes(otherUserId) && otherUser.contacts.includes(userId);
+    const userContacts = user.contacts ?? [];
+    const otherContacts = otherUser.contacts ?? [];
+    const userBlocked = user.blockedUsers ?? [];
+    const otherBlocked = otherUser.blockedUsers ?? [];
+    const isMutualContact = userContacts.includes(otherUserId) && otherContacts.includes(userId);
+    const eitherBlocked = userBlocked.includes(otherUserId) || otherBlocked.includes(userId);
     if (!isMutualContact) {
       res.status(403).json({ message: "Chat not allowed until request is accepted" });
+      return;
+    }
+    if (eitherBlocked) {
+      res.status(403).json({ message: "Chat not allowed for blocked users" });
       return;
     }
 

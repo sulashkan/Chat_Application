@@ -87,23 +87,29 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = useCallback((text: string) => {
-    if (!activeChat) return;
+ const handleSend = useCallback((text?: string, mediaUrl?: string) => {
+  if (!activeChat) return;
 
-    // Optimistic message
-    const optimistic: Message = {
-      _id: `tmp-${Date.now()}`,
-      chatId: activeChat._id,
-      sender: user!._id ?? user!.id,
-      text,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setMessages(prev => [...prev, optimistic]);
+  const getMediaType = (url: string): 'image' | 'video' | 'file' => {
+  if (url.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
+  if (url.match(/\.(mp4|webm)$/i)) return 'video';
+  return 'file';
+};
 
-    // Emit via socket
-    sendMessage(activeChat._id, text);
-  }, [activeChat, user]);
+const optimistic: Message = {
+  _id: `tmp-${Date.now()}`,
+  chatId: activeChat._id,
+  sender: user!._id ?? user!.id,
+  ...(text ? { text } : {}),
+  ...(mediaUrl ? { mediaUrl, mediaType: getMediaType(mediaUrl) } : {}),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+  setMessages(prev => [...prev, optimistic]);
+
+  sendMessage(activeChat._id, { text, mediaUrl });
+}, [activeChat, user]);
 
   // Empty state: no chat selected
   if (!activeChat) {
@@ -147,7 +153,7 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 chat-bg">
+      <div className=" flex-1  overflow-y-auto px-4 py-2 chat-bg">
         {loading ? (
           <div className="flex flex-col gap-3 pt-4">
             {[...Array(5)].map((_, i) => (

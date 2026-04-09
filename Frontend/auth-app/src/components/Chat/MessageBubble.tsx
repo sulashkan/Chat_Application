@@ -1,6 +1,7 @@
 import { formatMessageTime } from '../../utils/format';
 import type { Message } from '../../types';
 import clsx from 'clsx';
+import { getMediaUrl } from '../../utils/getMediaUrl';
 
 interface MessageBubbleProps {
   message: Message;
@@ -18,8 +19,8 @@ export const MessageBubble = ({ message, isMine, showTail = true }: MessageBubbl
             ? 'bg-[#005c4b] text-[#e9edef] rounded-br-none'
             : 'bg-[#202c33] text-[#e9edef] rounded-bl-none'
         )}
-      >
-        {/* Bubble tail */}
+        >
+          {/* Bubble tail */}
         {showTail && (
           <span
             className={clsx(
@@ -32,11 +33,43 @@ export const MessageBubble = ({ message, isMine, showTail = true }: MessageBubbl
         )}
 
         {/* Text */}
-        {message.text && (
-          <p className="text-[14.5px] leading-[1.45] break-words whitespace-pre-wrap pr-12">
-            {message.text}
-          </p>
-        )}
+       {/* Message Content (text or media) */}
+  <div className="pr-12">
+    {message.text && (
+    <p className="text-[14.5px] leading-[1.45] wrap-break-word whitespace-pre-wrap mb-1">
+      {message.text}
+    </p>
+  )}
+
+  {message.mediaUrl && (
+  <div>
+    {/\.(jpg|jpeg|png|gif)$/i.test(message.mediaUrl) && (
+      <img
+        src={getMediaUrl(message.mediaUrl)} 
+        className="w-30 h-30 rounded-lg mt-1"
+      />
+    )}
+
+    {/\.(mp4|webm)$/i.test(message.mediaUrl) && (
+      <video
+        src={getMediaUrl(message.mediaUrl)}
+        controls
+        className="max-w-xs rounded-lg mt-1"
+      />
+    )}
+
+    {!/\.(jpg|jpeg|png|gif|mp4|webm)$/i.test(message.mediaUrl) && (
+      <a
+        href={getMediaUrl(message.mediaUrl)} 
+        download
+        className="text-blue-400 underline text-sm mt-1 inline-block"
+      >
+        Download file
+      </a>
+    )}
+  </div>
+)}
+</div>
 
         {/* Time + tick */}
         <div className={clsx(

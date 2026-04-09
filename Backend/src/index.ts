@@ -14,6 +14,7 @@ import userRouter from "./routes/user.router";
 import chatRouter from "./routes/chat.router";
 import socketServer from "./socket";
 import messageRouter from "./routes/message.router"
+import uploadRouter from "./routes/upload.routes"
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/chats", chatRouter);
+app.use("/api/uploads", uploadRouter);
+app.use("/api/upload", uploadRouter);
+app.use("/uploads", express.static("uploads"));
 
 
 const PORT = process.env.PORT || 8000;

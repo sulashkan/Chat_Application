@@ -9,7 +9,7 @@ export const ChatHeader = () => {
   const isOnline = onlineUsers.includes(other._id);
 
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 bg-[#202c33] border-b border-[#ffffff0d]">
+    <div className="w-full z-10 fixed flex items-center justify-between px-4 py-2.5 bg-[#202c33] border-b border-[#ffffff0d]">
       <div className="flex items-center gap-3">
         <Avatar name={other.name} src={other.avatar} online={isOnline} />
         <div>

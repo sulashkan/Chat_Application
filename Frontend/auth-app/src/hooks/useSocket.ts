@@ -4,6 +4,7 @@ import { useChatCtx } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import type { Message } from '../types';
 import { playNotification } from '../utils/playNotification';
+import { showNotification } from '../utils/showNotification';
 
 interface UseSocketOptions {
   onMessage: (msg: Message) => void;
@@ -22,15 +23,25 @@ export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
     const handleOnlineUsers = (ids: string[]) => {
       setOnlineUsers(ids);
     };
-
     const handleReceiveMessage = (msg: Message) => {
-      console.log(activeChat?._id)
-        if (msg.chatId === activeChat?._id) {
-          console.log("msg")
-          playNotification();
-        }
-      onMessage(msg);
-    };
+      if (msg.chatId !== activeChat?._id) {
+        playNotification();
+
+     const body =
+      msg.text ??
+      (msg.mediaType === 'image'
+        ? 'Image'
+        : msg.mediaType === 'video'
+        ? 'Video'
+        : msg.mediaType === 'file'
+        ? 'File'
+        : 'New message');
+
+    showNotification('New Message', body);
+  }
+
+  onMessage(msg);
+};
 
     const handleShowTyping = ({ from }: { from: string }) => {
       if (activeChat && activeChat.members.includes(from)) {
@@ -65,9 +76,12 @@ export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
   }, [isAuthenticated, activeChat, onMessagesSeen]);
 };
 
-export const sendMessage = (chatId: string, text: string) => {
+export const sendMessage = (
+  chatId: string,
+  payload: { text?: string; mediaUrl?: string }
+) => {
   const socket = getSocket();
-  socket.emit('send_message', { chatId, text });
+  socket.emit('send_message', { chatId, ...payload });
 };
 
 export const sendTyping = (to: string) => {
