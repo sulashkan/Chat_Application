@@ -27,5 +27,6 @@ export interface Chat {
   name: string;
   email: string;
   avatar?: string;
+  unreadCount?: number;
 }[];
 }

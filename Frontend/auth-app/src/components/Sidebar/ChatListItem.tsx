@@ -36,27 +36,32 @@ export const ChatListItem = ({ chat, isActive, onClick }: ChatListItemProps) => 
   }
 />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <span className="text-[#e9edef] text-[15px] font-medium truncate">{displayName}</span>
-          {lastMsg && (
-            <span className="text-[11px] text-[#8696a0] shrink-0 ml-2">
-              {formatChatTime(lastMsg.createdAt)}
-            </span>
-          )}
-        </div>
+       <div className="flex items-start justify-between">
+  <div className="min-w-0">
+    <p className="text-[#e9edef] text-[15px] font-medium truncate">
+      {displayName}
+    </p>
+    <p className="text-[#8696a0] text-[13px] truncate mt-0.5">
+      {lastMsg?.text ?? (
+        <span className="italic opacity-60">No messages yet</span>
+      )}
+    </p>
+  </div>
 
-        <div className="flex items-center justify-between mt-0.5">
-          <p className="text-[#8696a0] text-[13px] truncate flex-1">
-            {lastMsg?.text ?? (
-              <span className="italic opacity-60">No messages yet</span>
-            )}
-          </p>
-          {(chat.unreadCount ?? 0) > 0 && (
-            <span className="ml-2 shrink-0 bg-[#00a884] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-              {chat.unreadCount}
-            </span>
-          )}
-        </div>
+  <div className="flex flex-col items-end gap-1 ml-3 shrink-0">
+    {lastMsg && (
+      <span className="text-[11px] text-[#8696a0]">
+        {formatChatTime(lastMsg.createdAt)}
+      </span>
+    )}
+
+    {(chat.unreadCount ?? 0) > 0 && (
+      <span className="bg-[#00a884] text-white text-[11px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center">
+        {chat.unreadCount}
+      </span>
+    )}
+  </div>
+</div>
       </div>
     </button>
   );

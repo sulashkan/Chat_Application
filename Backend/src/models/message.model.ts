@@ -5,7 +5,7 @@ export interface IMessage extends Document {
   sender: string;
   text?: string;
   mediaUrl?: string;
-  seen: boolean;
+  seenBy: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,7 +16,7 @@ const messageSchema: Schema<IMessage> = new mongoose.Schema(
     sender: { type: String, required: true },
     text: String,
     mediaUrl: String,
-    seen: { type: Boolean, default: false },
+    seenBy: [{ type: String }],  
   },
   { timestamps: true }
 );

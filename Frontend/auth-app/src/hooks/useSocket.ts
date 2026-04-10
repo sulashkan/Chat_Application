@@ -13,7 +13,7 @@ interface UseSocketOptions {
 
 export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
   const { isAuthenticated } = useAuth();
-  const { setOnlineUsers, setTypingUsers, activeChat } = useChatCtx();
+const { setOnlineUsers, setTypingUsers, activeChat, setChats } = useChatCtx();
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -23,11 +23,32 @@ export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
     const handleOnlineUsers = (ids: string[]) => {
       setOnlineUsers(ids);
     };
-    const handleReceiveMessage = (msg: Message) => {
-      if (msg.chatId !== activeChat?._id) {
-        playNotification();
 
-     const body =
+   const handleReceiveMessage = (msg: Message) => {
+  const isChatOpen = msg.chatId === activeChat?._id;
+
+  if (!isChatOpen) {
+   setChats(prev =>
+  prev.map(chat => {
+    if (chat._id !== msg.chatId) return chat;
+
+    const isActive = chat._id === activeChat?._id;
+
+    return {
+      ...chat,
+      lastMessage: msg,
+      unreadCount: isActive ? 0 : (chat.unreadCount || 0) + 1,
+    };
+  })
+  // move chat to top
+  .sort((a, b) =>
+    a._id === msg.chatId ? -1 : b._id === msg.chatId ? 1 : 0
+  )
+);
+
+    playNotification();
+
+    const body =
       msg.text ??
       (msg.mediaType === 'image'
         ? 'Image'
@@ -42,7 +63,6 @@ export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
 
   onMessage(msg);
 };
-
     const handleShowTyping = ({ from }: { from: string }) => {
       if (activeChat && activeChat.members.includes(from)) {
         setTypingUsers((prev: string[]) => {
@@ -88,6 +108,8 @@ export const sendTyping = (to: string) => {
   const socket = getSocket();
   socket.emit('typing', { to });
 };
+
+
 
 export const markMessagesSeen = (from: string, chatId: string) => {
   const socket = getSocket();

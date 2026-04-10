@@ -6,12 +6,19 @@ type SidebarPanel = 'chats' | 'new-chat' | 'create-group' | 'manage-group';
 interface ChatContextValue {
   activeChat: Chat | null;
   setActiveChat: (chat: Chat | null) => void;
+
+  chats: Chat[];                        
+  setChats: React.Dispatch<React.SetStateAction<Chat[]>>; // ✅ ADD
+
   onlineUsers: string[];
   setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
+
   users: User[];
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+
   typingUsers: string[];
   setTypingUsers: React.Dispatch<React.SetStateAction<string[]>>;
+
   sidebarPanel: SidebarPanel;
   setSidebarPanel: React.Dispatch<React.SetStateAction<SidebarPanel>>;
 }
@@ -24,10 +31,27 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [sidebarPanel, setSidebarPanel] = useState<SidebarPanel>('chats');
+  const [chats, setChats] = useState<Chat[]>([]);
 
   return (
-    <ChatContext.Provider value={{ activeChat, setActiveChat, onlineUsers, setOnlineUsers, users, setUsers, typingUsers, setTypingUsers, sidebarPanel, setSidebarPanel }}>
-      {children}
+<ChatContext.Provider
+  value={{
+    activeChat,
+    setActiveChat,
+
+    chats,            
+    setChats,         
+
+    onlineUsers,
+    setOnlineUsers,
+    users,
+    setUsers,
+    typingUsers,
+    setTypingUsers,
+    sidebarPanel,
+    setSidebarPanel,
+  }}
+>      {children}
     </ChatContext.Provider>
   );
 };

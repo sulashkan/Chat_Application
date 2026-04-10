@@ -63,12 +63,13 @@ const socketServer = (io: Server) => {
   }
 
   // Save message
-  const message = await Message.create({
-    chatId,
-    sender: senderId,
-    text,
-    mediaUrl,
-  });
+ const message = await Message.create({
+  chatId,
+  sender: senderId,
+  text,
+  mediaUrl,
+  seenBy: [senderId],
+});
 
   //  Update last message in chat
   await Chat.findByIdAndUpdate(chatId, {
@@ -98,17 +99,22 @@ const socketServer = (io: Server) => {
     });
 
     // Mark messages as seen
-    socket.on("mark_seen", async ({ from, chatId }) => {
-      await Message.updateMany(
-        { chatId, sender: from, seen: false },
-        { seen: true }
-      );
+//     socket.on("mark_seen", async ({ from, chatId }) => {
+//      await Message.updateMany(
+//   {
+//     chatId,
+//     seen: { $ne: userId },
+//   },
+//   {
+//     $push: { seen: userId },
+//   }
+// );
 
-      const senderSocketId = onlineUsers.get(from);
-      if (senderSocketId) {
-        io.to(senderSocketId).emit("messages_seen", { chatId });
-      }
-    });
+//       const senderSocketId = onlineUsers.get(from);
+//       if (senderSocketId) {
+//         io.to(senderSocketId).emit("messages_seen", { chatId });
+//       }
+//     });
 
     // Disconnect
     socket.on("disconnect", () => {

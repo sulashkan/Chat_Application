@@ -15,15 +15,17 @@ interface SidebarProps {
 
 export const Sidebar = ({ onMessageReceived }: SidebarProps) => {
   const { user, logout } = useAuth();
-  const {
-    activeChat,
-    setActiveChat,
-    onlineUsers,
-    setUsers,
-    sidebarPanel,
-    setSidebarPanel,
-  } = useChatCtx();
-  const [chats, setChats] = useState<Chat[]>([]);
+ const {
+  chats,
+  setChats,
+  activeChat,
+  setActiveChat,
+  onlineUsers,
+  setUsers,
+  sidebarPanel,
+  setSidebarPanel,
+} = useChatCtx();
+  // const [chats, setChats] = useState<Chat[]>([]);
   const [users, setLocalUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [loadingChats, setLoadingChats] = useState(true);

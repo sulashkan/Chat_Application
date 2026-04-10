@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { getMessages } from '../../api';
-import { sendMessage, markMessagesSeen, useSocket } from '../../hooks/useSocket';
-import { useChatCtx } from '../../context/ChatContext';
-import { useAuth } from '../../context/AuthContext';
-import { MessageBubble } from './MessageBubble';
-import { DateDivider } from './DateDivider';
-import { MessageInput } from './MessageInput';
-import { ChatHeader } from './ChatHeader';
-import type { Message } from '../../types';
-import { format } from 'date-fns';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { getMessages } from "../../api";
+import {
+  sendMessage,
+  markMessagesSeen,
+  useSocket,
+} from "../../hooks/useSocket";
+import { useChatCtx } from "../../context/ChatContext";
+import { useAuth } from "../../context/AuthContext";
+import { MessageBubble } from "./MessageBubble";
+import { DateDivider } from "./DateDivider";
+import { MessageInput } from "./MessageInput";
+import { ChatHeader } from "./ChatHeader";
+import type { Message } from "../../types";
+import { format } from "date-fns";
 
 interface ChatWindowProps {
   incomingMessage: Message | null;
@@ -17,8 +21,8 @@ interface ChatWindowProps {
 // Group messages by date
 const groupByDate = (messages: Message[]) => {
   const groups: { date: string; messages: Message[] }[] = [];
-  messages.forEach(msg => {
-    const day = format(new Date(msg.createdAt), 'yyyy-MM-dd');
+  messages.forEach((msg) => {
+    const day = format(new Date(msg.createdAt), "yyyy-MM-dd");
     const last = groups[groups.length - 1];
     if (last?.date === day) {
       last.messages.push(msg);
@@ -30,13 +34,24 @@ const groupByDate = (messages: Message[]) => {
 };
 
 export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
-  const { activeChat, typingUsers } = useChatCtx();
+const { activeChat, typingUsers, users, setChats } = useChatCtx();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const myId = (user?._id || user?.id)?.toString();
+
+  const otherUserId = activeChat?.members.find((id) => id !== myId);
+
+  const otherUser = users.find((u) => u._id === otherUserId);
+
+  const canSendMessage =
+    activeChat?.isGroup ||
+    (otherUser &&
+      otherUser.isContact &&
+      !otherUser.isBlocked &&
+      !otherUser.isBlockedBy);
 
   // Handle socket events
   useSocket({
@@ -45,22 +60,38 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
     },
     onMessagesSeen: (chatId: string) => {
       if (activeChat?._id !== chatId) return;
-      setMessages(prev => prev.map(msg => ({ ...msg, seen: true })));
+      setMessages((prev) => prev.map((msg) => ({ ...msg, seen: true })));
     },
   });
 
+
+ useEffect(() => {
+  if (!activeChat) return;
+
+  setChats(prev =>
+    prev.map(chat =>
+      chat._id === activeChat._id
+        ? { ...chat, unreadCount: 0 }
+        : chat
+    )
+  );
+}, [activeChat]);
+
   // Load messages when chat changes
   useEffect(() => {
-    if (!activeChat) { setMessages([]); return; }
+    if (!activeChat) {
+      setMessages([]);
+      return;
+    }
 
     setLoading(true);
     setMessages([]);
 
     getMessages(activeChat._id)
-      .then(res => {
+      .then((res) => {
         setMessages(res.data);
         // Mark messages as seen when chat is opened
-        const otherUser = activeChat.members.find(id => id !== myId);
+        const otherUser = activeChat.members.find((id) => id !== myId);
         if (otherUser) {
           markMessagesSeen(otherUser, activeChat._id);
         }
@@ -73,10 +104,10 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
   useEffect(() => {
     if (!incomingMessage) return;
     if (incomingMessage.chatId !== activeChat?._id) return;
-    setMessages(prev => [...prev, incomingMessage]);
-    
+    setMessages((prev) => [...prev, incomingMessage]);
+
     // Mark the new message as seen
-    const otherUser = activeChat?.members.find(id => id !== myId);
+    const otherUser = activeChat?.members.find((id) => id !== myId);
     if (otherUser) {
       markMessagesSeen(otherUser, activeChat._id);
     }
@@ -84,32 +115,35 @@ export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
 
   // Auto scroll to bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
- const handleSend = useCallback((text?: string, mediaUrl?: string) => {
-  if (!activeChat) return;
+  const handleSend = useCallback(
+    (text?: string, mediaUrl?: string) => {
+      if (!activeChat) return;
 
-  const getMediaType = (url: string): 'image' | 'video' | 'file' => {
-  if (url.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
-  if (url.match(/\.(mp4|webm)$/i)) return 'video';
-  return 'file';
-};
+      const getMediaType = (url: string): "image" | "video" | "file" => {
+        if (url.match(/\.(jpg|jpeg|png|gif)$/i)) return "image";
+        if (url.match(/\.(mp4|webm)$/i)) return "video";
+        return "file";
+      };
 
-const optimistic: Message = {
-  _id: `tmp-${Date.now()}`,
-  chatId: activeChat._id,
-  sender: user!._id ?? user!.id,
-  ...(text ? { text } : {}),
-  ...(mediaUrl ? { mediaUrl, mediaType: getMediaType(mediaUrl) } : {}),
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
+      const optimistic: Message = {
+        _id: `tmp-${Date.now()}`,
+        chatId: activeChat._id,
+        sender: user!._id ?? user!.id,
+        ...(text ? { text } : {}),
+        ...(mediaUrl ? { mediaUrl, mediaType: getMediaType(mediaUrl) } : {}),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-  setMessages(prev => [...prev, optimistic]);
+      setMessages((prev) => [...prev, optimistic]);
 
-  sendMessage(activeChat._id, { text, mediaUrl });
-}, [activeChat, user]);
+      sendMessage(activeChat._id, { text, mediaUrl });
+    },
+    [activeChat, user],
+  );
 
   // Empty state: no chat selected
   if (!activeChat) {
@@ -117,19 +151,43 @@ const optimistic: Message = {
       <div className="flex-1 chat-bg flex flex-col items-center justify-center text-center">
         <div className="flex flex-col items-center gap-4 opacity-80">
           <div className="w-24 h-24 rounded-full bg-[#202c33] flex items-center justify-center">
-            <svg className="w-12 h-12 text-[#8696a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeWidth="1.2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <svg
+              className="w-12 h-12 text-[#8696a0]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeWidth="1.2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
           </div>
           <div>
-            <h2 className="text-[#e9edef] text-xl font-semibold mb-2">ChatApp</h2>
+            <h2 className="text-[#e9edef] text-xl font-semibold mb-2">
+              ChatApp
+            </h2>
             <p className="text-[#8696a0] text-sm max-w-xs leading-relaxed">
-              Select a conversation to start chatting, or open a new chat from the sidebar.
+              Select a conversation to start chatting, or open a new chat from
+              the sidebar.
             </p>
           </div>
           <div className="flex items-center gap-2 text-[#8696a0] text-xs mt-2 bg-[#182229] px-4 py-2 rounded-full">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <rect x="3" y="11" width="18" height="11" rx="2" strokeWidth="2" />
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <rect
+                x="3"
+                y="11"
+                width="18"
+                height="11"
+                rx="2"
+                strokeWidth="2"
+              />
               <path d="M7 11V7a5 5 0 0110 0v4" strokeWidth="2" />
             </svg>
             End-to-end encrypted
@@ -148,7 +206,8 @@ const optimistic: Message = {
       {/* Encryption notice */}
       <div className="flex justify-center px-3 pt-3 md:px-4">
         <div className="bg-[#182229] text-[#8696a0] text-[12px] px-3 py-2 rounded-lg text-center max-w-md leading-relaxed">
-          Messages are end-to-end encrypted. No one outside of this chat can read them.
+          Messages are end-to-end encrypted. No one outside of this chat can
+          read them.
         </div>
       </div>
 
@@ -159,11 +218,11 @@ const optimistic: Message = {
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'} animate-pulse`}
+                className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"} animate-pulse`}
               >
                 <div
-                  className={`h-10 rounded-lg ${i % 2 === 0 ? 'bg-[#202c33]' : 'bg-[#005c4b]'}`}
-                  style={{ width: `${140 + (i * 30) % 120}px` }}
+                  className={`h-10 rounded-lg ${i % 2 === 0 ? "bg-[#202c33]" : "bg-[#005c4b]"}`}
+                  style={{ width: `${140 + ((i * 30) % 120)}px` }}
                 />
               </div>
             ))}
@@ -176,12 +235,14 @@ const optimistic: Message = {
           </div>
         ) : (
           <>
-            {grouped.map(group => (
+            {grouped.map((group) => (
               <div key={group.date}>
                 <DateDivider date={group.messages[0].createdAt} />
                 <div className="flex flex-col gap-1">
                   {group.messages.map((msg, idx) => {
-                      const isMine = msg.sender?.toString() === myId;                    const isLast = idx === group.messages.length - 1 ||
+                    const isMine = msg.sender?.toString() === myId;
+                    const isLast =
+                      idx === group.messages.length - 1 ||
                       group.messages[idx + 1]?.sender !== msg.sender;
                     return (
                       <MessageBubble
@@ -204,16 +265,32 @@ const optimistic: Message = {
       {typingUsers.length > 0 && (
         <div className="px-3 py-2 md:px-4 text-[#8696a0] text-sm flex items-center gap-2">
           <div className="flex gap-1">
-            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div
+              className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce"
+              style={{ animationDelay: "150ms" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce"
+              style={{ animationDelay: "300ms" }}
+            ></div>
           </div>
-          {typingUsers.length === 1 ? 'typing...' : `${typingUsers.length} people typing...`}
+          {typingUsers.length === 1
+            ? "typing..."
+            : `${typingUsers.length} people typing...`}
         </div>
       )}
 
+      {!canSendMessage && (
+        <div className="px-4 py-2 text-xs text-red-400 text-center bg-[#1a1a1a]">
+          You can’t send messages to this user anymore.
+        </div>
+      )}
       {/* Input */}
-      <MessageInput onSend={handleSend} />
+      <MessageInput onSend={handleSend} disabled={!canSendMessage} />
     </div>
   );
 };

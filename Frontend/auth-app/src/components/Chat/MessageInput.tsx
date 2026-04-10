@@ -109,8 +109,9 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
       {/* Attachment button */}
       <input type="file" hidden ref={fileRef} onChange={handleFileUpload} />
       <button
+      disabled={disabled}
       onClick={() => fileRef.current?.click()}
-      className="p-2 text-[#8696a0] hover:text-[#e9edef] transition-colors shrink-0 mb-0.5">
+      className={`p-2 text-[#8696a0] ${disabled ? "" : "hover:text-[#e9edef]"} transition-colors shrink-0 mb-0.5`}>
         <svg
           className="w-6 h-6"
           fill="none"

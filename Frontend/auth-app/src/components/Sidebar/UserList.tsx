@@ -404,6 +404,7 @@ export const UserList = ({ mode, onClose, onChatUpdated }: UserListProps) => {
                   <p className="text-[#e9edef] text-[15px] font-medium truncate">{u.name}</p>
                   <p className="text-[#8696a0] text-[13px] truncate">{u.email}</p>
                 </div>
+                
                 <div className="flex flex-wrap justify-end items-center gap-2 max-w-[11rem]">
                   {u.isContact ? (
                     <>
