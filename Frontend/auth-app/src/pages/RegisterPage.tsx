@@ -48,8 +48,7 @@ export const RegisterPage = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const ok = await handleRegister({ email, password, name });
-    console.log("ok", ok);
-    if (ok) navigate('/dashboard');
+    if (ok) navigate('/');
   };
 
   return (

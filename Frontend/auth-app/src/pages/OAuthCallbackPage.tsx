@@ -22,7 +22,7 @@ export const OAuthCallbackPage = () => {
       try {
         const user: User = JSON.parse(atob(userRaw));
         setAuth(user, token);
-        navigate('/dashboard', { replace: true });
+        navigate('/', { replace: true });
       } catch {
         navigate('/login?error=oauth_failed', { replace: true });
       }

@@ -72,7 +72,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
   onSend(undefined, mediaUrl);
 };
   return (
-    <div className="flex items-end gap-2 px-3 py-2 bg-[#202c33]">
+    <div className="flex items-end gap-2 px-2 py-2 md:px-3 bg-[#202c33]">
       {/* Emoji button */}
       {/* <button className="p-2 text-[#8696a0] hover:text-[#e9edef] transition-colors flex-shrink-0 mb-0.5">
         <svg
@@ -108,7 +108,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
 
       {/* Attachment button */}
       <input type="file" hidden ref={fileRef} onChange={handleFileUpload} />
-      <button 
+      <button
       onClick={() => fileRef.current?.click()}
       className="p-2 text-[#8696a0] hover:text-[#e9edef] transition-colors shrink-0 mb-0.5">
         <svg
@@ -126,7 +126,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
       </button>
 
       {/* Textarea */}
-      <div className="flex-1 bg-[#2a3942] rounded-lg overflow-hidden">
+      <div className="flex-1 min-w-0 bg-[#2a3942] rounded-lg overflow-hidden">
         <textarea
           value={text}
           onChange={handleChange}
@@ -134,7 +134,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
           placeholder="Type a message"
           rows={1}
           disabled={disabled}
-          className="w-full bg-transparent px-4 py-3 text-[15px] text-[#e9edef] placeholder-[#8696a0] outline-none resize-none max-h-32 leading-relaxed"
+          className="w-full bg-transparent px-3 py-3 md:px-4 text-[15px] text-[#e9edef] placeholder-[#8696a0] outline-none resize-none max-h-32 leading-relaxed"
           style={{ minHeight: "44px" }}
         />
       </div>

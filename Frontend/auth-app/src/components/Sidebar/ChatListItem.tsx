@@ -13,9 +13,10 @@ interface ChatListItemProps {
 export const ChatListItem = ({ chat, isActive, onClick }: ChatListItemProps) => {
   const { onlineUsers } = useChatCtx();
   const other = chat.otherUser;
-  if (!other) return null;
+  if (!chat.isGroup && !other) return null;
 
-  const isOnline = onlineUsers.includes(other._id);
+  const displayName = chat.isGroup ? chat.groupName || 'Unnamed group' : other?.name || 'Unknown';
+  const isOnline = other ? onlineUsers.includes(other._id) : false;
   const lastMsg = chat.lastMessage;
 
   return (
@@ -26,11 +27,17 @@ export const ChatListItem = ({ chat, isActive, onClick }: ChatListItemProps) => 
         isActive ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]'
       )}
     >
-      <Avatar name={other.name} src={other.avatar} online={isOnline} />
-
+<Avatar
+  name={displayName}
+  src={
+    chat.isGroup
+      ? chat.memberDetails?.[0]?.avatar
+      : other?.avatar
+  }
+/>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className="text-[#e9edef] text-[15px] font-medium truncate">{other.name}</span>
+          <span className="text-[#e9edef] text-[15px] font-medium truncate">{displayName}</span>
           {lastMsg && (
             <span className="text-[11px] text-[#8696a0] shrink-0 ml-2">
               {formatChatTime(lastMsg.createdAt)}

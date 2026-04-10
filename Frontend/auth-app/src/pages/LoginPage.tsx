@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthCard } from '../components/auth/AuthCard';
 import { InputField } from '../components/auth/InputField';
 import { OAuthButtons } from '../components/auth/OAuthButtons';
@@ -49,6 +49,16 @@ export const LoginPage = () => {
   const [showPw, setShowPw] = useState(false);
   const { handleLogin, loading, error } = useAuthForm();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const oauthError = searchParams.get('error');
+  const pageError =
+    oauthError === 'oauth_failed'
+      ? 'Google sign in could not be completed. Please try again.'
+      : oauthError === 'oauth_missing'
+      ? 'Google sign in did not return the required login data.'
+      : oauthError === 'google_oauth_not_configured'
+      ? 'Google sign in is not configured on the server yet.'
+      : null;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -90,7 +100,7 @@ export const LoginPage = () => {
             autoComplete="current-password"
           />
 
-          {error && <p className={styles.error}>{error}</p>}
+          {(error || pageError) && <p className={styles.error}>{error || pageError}</p>}
 
           <div className={styles.forgot}>
             <Link to="/forgot-password" className={styles.forgotLink}>Forgot password?</Link>

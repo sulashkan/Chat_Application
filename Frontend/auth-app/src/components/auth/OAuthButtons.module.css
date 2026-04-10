@@ -69,3 +69,19 @@
 .oauthBtn:active {
   transform: translateY(0);
 }
+
+@media (max-width: 640px) {
+  .divider {
+    gap: 8px;
+    margin: 18px 0 14px;
+  }
+
+  .dividerText {
+    font-size: 11px;
+  }
+
+  .oauthBtn {
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+}

@@ -16,7 +16,16 @@ export interface Message {
 export interface Chat {
   _id: string;
   members: string[];
+  isGroup?: boolean;
+  groupName?: string;
+  groupAdmin?: string;
   lastMessage?: Message;
   unreadCount?: number;
   otherUser?: User;
+  memberDetails?: {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}[];
 }

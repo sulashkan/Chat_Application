@@ -11,6 +11,12 @@
   font-family: 'DM Sans', sans-serif;
 }
 
+@supports (min-height: 100dvh) {
+  .page {
+    min-height: 100dvh;
+  }
+}
+
 /* Sky gradient background */
 .bg {
   position: fixed;
@@ -180,3 +186,39 @@
 }
 
 .switchLink:hover { color: #374151; }
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px;
+    align-items: stretch;
+  }
+
+  .bgCircle1 {
+    width: 320px;
+    height: 320px;
+  }
+
+  .bgCircle2 {
+    width: 520px;
+    height: 520px;
+  }
+
+  .bgCircle3 {
+    bottom: -90px;
+    height: 180px;
+  }
+
+  .iconBox {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  .form {
+    gap: 10px;
+  }
+
+  .primaryBtn {
+    padding: 13px;
+  }
+}

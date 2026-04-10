@@ -99,3 +99,23 @@ export const getMyChats = () => {
 export const getOrCreatePrivateChat = (userId: string) => {
   return apiClient.post('/api/chats/private', { userId });
 };
+
+export const createGroupChat = (name: string, memberIds: string[]) => {
+  return apiClient.post('/api/chats/group', { name, memberIds });
+};
+
+export const updateGroupChat = (chatId: string, name: string) => {
+  return apiClient.patch(`/api/chats/${chatId}/group`, { name });
+};
+
+export const addGroupMembers = (chatId: string, memberIds: string[]) => {
+  return apiClient.post(`/api/chats/${chatId}/group/members`, { memberIds });
+};
+
+export const removeGroupMember = (chatId: string, memberId: string) => {
+  return apiClient.delete(`/api/chats/${chatId}/group/members/${memberId}`);
+};
+
+export const leaveGroupChat = (chatId: string) => {
+  return apiClient.post(`/api/chats/${chatId}/group/leave`);
+};
