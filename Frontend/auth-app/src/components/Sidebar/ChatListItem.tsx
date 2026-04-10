@@ -1,7 +1,7 @@
 import { Avatar } from '../UI/Avatar';
 import { formatChatTime } from '../../utils/format';
 import type { Chat } from '../../types';
-import { useChatCtx } from '../../context/ChatContext';
+// import { useChatCtx } from '../../context/ChatContext';
 import clsx from 'clsx';
 
 interface ChatListItemProps {
@@ -11,12 +11,12 @@ interface ChatListItemProps {
 }
 
 export const ChatListItem = ({ chat, isActive, onClick }: ChatListItemProps) => {
-  const { onlineUsers } = useChatCtx();
+  // const { onlineUsers } = useChatCtx();
   const other = chat.otherUser;
   if (!chat.isGroup && !other) return null;
 
   const displayName = chat.isGroup ? chat.groupName || 'Unnamed group' : other?.name || 'Unknown';
-  const isOnline = other ? onlineUsers.includes(other._id) : false;
+  // const isOnline = other ? onlineUsers.includes(other._id) : false;
   const lastMsg = chat.lastMessage;
 
   return (
@@ -56,7 +56,7 @@ export const ChatListItem = ({ chat, isActive, onClick }: ChatListItemProps) => 
     )}
 
     {(chat.unreadCount ?? 0) > 0 && (
-      <span className="bg-[#00a884] text-white text-[11px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center">
+      <span className="bg-[#00a884] text-white text-[11px] font-bold min-w-5 h-5 px-1 rounded-full flex items-center justify-center">
         {chat.unreadCount}
       </span>
     )}

@@ -26,7 +26,7 @@ export const ChatPage = () => {
     <div className="flex min-h-screen bg-[#111b21] overflow-hidden">
       <div
         className={[
-          "w-full border-r border-[#ffffff1a] flex flex-col md:w-[24rem] md:min-w-[22rem] md:max-w-[26rem]",
+          "w-full border-r border-[#ffffff1a] flex flex-col md:w-[24rem] md:min-w-88 md:max-w-104",
           activeChat ? "hidden md:flex" : "flex",
         ].join(" ")}
       >

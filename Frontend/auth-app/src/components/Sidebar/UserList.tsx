@@ -34,7 +34,7 @@ export const UserList = ({ mode, onClose, onChatUpdated }: UserListProps) => {
   const { user: me } = useAuth();
    if (!me) return null;
   const currentUserId:string = me?._id || me?.id;
-  const { setUsers, setActiveChat, setSidebarPanel, onlineUsers, activeChat } = useChatCtx();
+  const { setUsers, setActiveChat, onlineUsers, activeChat } = useChatCtx();
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -405,7 +405,7 @@ export const UserList = ({ mode, onClose, onChatUpdated }: UserListProps) => {
                   <p className="text-[#8696a0] text-[13px] truncate">{u.email}</p>
                 </div>
                 
-                <div className="flex flex-wrap justify-end items-center gap-2 max-w-[11rem]">
+                <div className="flex flex-wrap justify-end items-center gap-2 max-w-44">
                   {u.isContact ? (
                     <>
                       <button
