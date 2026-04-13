@@ -90,9 +90,18 @@ export const Sidebar = ({ onMessageReceived }: SidebarProps) => {
       .includes(search.toLowerCase()),
     );
     
+    // const handleChatClick = (chat: Chat) => {
+    //   setActiveChat(chat);
+    // };
     const handleChatClick = (chat: Chat) => {
-      setActiveChat(chat);
-    };
+  setChats(prev =>
+    prev.map(c =>
+      c._id === chat._id ? { ...c, unreadCount: 0 } : c
+    )
+  );
+
+  setActiveChat(chat);
+};
     
    
   const handleChatUpdated = (

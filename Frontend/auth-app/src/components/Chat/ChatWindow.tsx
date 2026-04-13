@@ -65,17 +65,17 @@ const { activeChat, typingUsers, users, setChats } = useChatCtx();
   });
 
 
- useEffect(() => {
-  if (!activeChat) return;
+//  useEffect(() => {
+//   if (!activeChat) return;
 
-  setChats(prev =>
-    prev.map(chat =>
-      chat._id === activeChat._id
-        ? { ...chat, unreadCount: 0 }
-        : chat
-    )
-  );
-}, [activeChat]);
+//   setChats(prev =>
+//     prev.map(chat =>
+//       chat._id === activeChat._id
+//         ? { ...chat, unreadCount: 0 }
+//         : chat
+//     )
+//   );
+// }, [activeChat]);
 
   // Load messages when chat changes
   useEffect(() => {

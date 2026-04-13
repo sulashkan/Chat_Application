@@ -12,7 +12,7 @@ if (isGoogleAuthConfigured) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID as string,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-       callbackURL: "http://localhost:5000/api/auth/google/callback",
+       callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
       },
       async (_accessToken: string, _refreshToken: string, profile: any, done: any) => {
         const user = {

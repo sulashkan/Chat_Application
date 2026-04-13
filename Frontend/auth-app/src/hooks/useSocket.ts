@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect , useRef } from 'react';
 import { getSocket } from '../socket';
 import { useChatCtx } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,11 @@ interface UseSocketOptions {
 export const useSocket = ({ onMessage, onMessagesSeen }: UseSocketOptions) => {
   const { isAuthenticated } = useAuth();
 const { setOnlineUsers, setTypingUsers, activeChat, setChats } = useChatCtx();
+const activeChatRef = useRef(activeChat);
+
+useEffect(() => {
+  activeChatRef.current = activeChat;
+}, [activeChat]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -25,14 +30,14 @@ const { setOnlineUsers, setTypingUsers, activeChat, setChats } = useChatCtx();
     };
 
    const handleReceiveMessage = (msg: Message) => {
-  const isChatOpen = msg.chatId === activeChat?._id;
+ const isChatOpen = msg.chatId === activeChatRef.current?._id;
 
   if (!isChatOpen) {
    setChats(prev =>
   prev.map(chat => {
     if (chat._id !== msg.chatId) return chat;
 
-    const isActive = chat._id === activeChat?._id;
+   const isActive = chat._id === activeChatRef.current?._id;
 
     return {
       ...chat,
@@ -78,9 +83,16 @@ const { setOnlineUsers, setTypingUsers, activeChat, setChats } = useChatCtx();
       }
     };
 
-    const handleMessagesSeen = ({ chatId }: { chatId: string }) => {
-      onMessagesSeen?.(chatId);
-    };
+  const handleMessagesSeen = ({ chatId }: { chatId: string }) => {
+  setChats(prev =>
+    prev.map(chat =>
+      chat._id === chatId
+        ? { ...chat, unreadCount: 0 }
+        : chat
+    )
+  );
+  onMessagesSeen?.(chatId);
+};
 
     socket.on('online_users', handleOnlineUsers);
     socket.on('receive_message', handleReceiveMessage);
@@ -93,7 +105,7 @@ const { setOnlineUsers, setTypingUsers, activeChat, setChats } = useChatCtx();
       socket.off('show_typing', handleShowTyping);
       socket.off('messages_seen', handleMessagesSeen);
     };
-  }, [isAuthenticated, activeChat, onMessagesSeen]);
+  }, [isAuthenticated, onMessagesSeen]);
 };
 
 export const sendMessage = (
