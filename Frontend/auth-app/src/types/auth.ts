@@ -37,4 +37,4 @@ export interface ApiError {
   status?: number;
 }
 
-export type OAuthProvider = 'google' | 'facebook' | 'apple';
+export type OAuthProvider = 'google';

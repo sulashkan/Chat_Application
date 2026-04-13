@@ -34,7 +34,7 @@ const groupByDate = (messages: Message[]) => {
 };
 
 export const ChatWindow = ({ incomingMessage }: ChatWindowProps) => {
-const { activeChat, typingUsers, users, setChats } = useChatCtx();
+  const { activeChat, typingUsers, users, setChats } = useChatCtx();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,18 +64,17 @@ const { activeChat, typingUsers, users, setChats } = useChatCtx();
     },
   });
 
+  //  useEffect(() => {
+  //   if (!activeChat) return;
 
-//  useEffect(() => {
-//   if (!activeChat) return;
-
-//   setChats(prev =>
-//     prev.map(chat =>
-//       chat._id === activeChat._id
-//         ? { ...chat, unreadCount: 0 }
-//         : chat
-//     )
-//   );
-// }, [activeChat]);
+  //   setChats(prev =>
+  //     prev.map(chat =>
+  //       chat._id === activeChat._id
+  //         ? { ...chat, unreadCount: 0 }
+  //         : chat
+  //     )
+  //   );
+  // }, [activeChat]);
 
   // Load messages when chat changes
   useEffect(() => {
@@ -244,12 +243,17 @@ const { activeChat, typingUsers, users, setChats } = useChatCtx();
                     const isLast =
                       idx === group.messages.length - 1 ||
                       group.messages[idx + 1]?.sender !== msg.sender;
+                    const senderUser = users?.find(
+                      (u) => u._id.toString() === msg.sender?.toString(),
+                    );
                     return (
                       <MessageBubble
                         key={msg._id}
                         message={msg}
                         isMine={isMine}
                         showTail={isLast}
+                        sender={senderUser}
+                        isGroup={activeChat.isGroup}
                       />
                     );
                   })}

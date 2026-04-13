@@ -1,5 +1,5 @@
 import { formatMessageTime } from '../../utils/format';
-import type { Message } from '../../types';
+import type { Message, User } from '../../types';
 import clsx from 'clsx';
 import { getMediaUrl } from '../../utils/getMediaUrl';
 
@@ -7,9 +7,11 @@ interface MessageBubbleProps {
   message: Message;
   isMine: boolean;
   showTail?: boolean;
+  sender?: User;
+  isGroup?: boolean;
 }
 
-export const MessageBubble = ({ message, isMine, showTail = true }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, isMine, showTail = true , sender , isGroup }: MessageBubbleProps) => {
   return (
     <div className={clsx('flex msg-animate', isMine ? 'justify-end' : 'justify-start')}>
       <div
@@ -20,6 +22,11 @@ export const MessageBubble = ({ message, isMine, showTail = true }: MessageBubbl
             : 'bg-[#202c33] text-[#e9edef] rounded-bl-none'
         )}
         >
+      {isGroup && !isMine && sender && (
+     <p className="text-xs font-semibold mb-1 text-[#00a884]">
+  {sender.name}
+    </p>
+)}
           {/* Bubble tail */}
         {showTail && (
           <span
