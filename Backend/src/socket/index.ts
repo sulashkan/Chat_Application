@@ -11,7 +11,27 @@ interface JwtPayload {
   id: string;
 }
 
+
+
 const socketServer = (io: Server) => {
+
+  // helper function 
+  const emitOnlineContacts = async (userId: string) => {
+  const user = await User.findById(userId).lean();
+  if (!user) return;
+
+  const contacts: string[] = user.contacts ?? [];
+
+  const onlineContacts = contacts.filter((id) =>
+    onlineUsers.has(id)
+  );
+
+  const socketId = onlineUsers.get(userId);
+  if (socketId) {
+    io.to(socketId).emit("online_users", onlineContacts);
+  }
+};
+
   // Middleware: authenticate socket with JWT
   io.use((socket: Socket, next) => {
     try {
@@ -29,15 +49,25 @@ const socketServer = (io: Server) => {
     }
   });
 
-  io.on("connection", (socket: Socket) => {
+  io.on("connection",  async (socket: Socket) => {
     const userId = socket.data.userId;
       // console.log("User connected:", userId);
 
     //  Add to online users
-    onlineUsers.set(userId, socket.id);
-      // console.log("Online users map:", onlineUsers);
+   onlineUsers.set(userId, socket.id);
 
-    io.emit("online_users", Array.from(onlineUsers.keys()));
+// Send this user his online contacts
+await emitOnlineContacts(userId);
+
+// Notify his contacts that he is online
+const user = await User.findById(userId).lean();
+const contacts: string[] = user?.contacts ?? [];
+
+contacts.forEach((contactId) => {
+  if (onlineUsers.has(contactId)) {
+    emitOnlineContacts(contactId);
+  }
+});
 
     //  Send message
    socket.on("send_message", async ({ chatId, text, mediaUrl }) => {
@@ -85,7 +115,7 @@ const socketServer = (io: Server) => {
       }
     }
   });
-});
+    });
 
     //  Typing indicator
     socket.on("typing", ({ to }) => {
@@ -99,27 +129,36 @@ const socketServer = (io: Server) => {
     });
 
     // Mark messages as seen
-//     socket.on("mark_seen", async ({ from, chatId }) => {
-//      await Message.updateMany(
-//   {
-//     chatId,
-//     seen: { $ne: userId },
-//   },
-//   {
-//     $push: { seen: userId },
-//   }
-// );
+    socket.on("mark_seen", async ({ from, chatId }) => {
+     await Message.updateMany(
+  {
+    chatId,
+    seen: { $ne: userId },
+  },
+  {
+    $push: { seen: userId },
+  }
+);
 
-//       const senderSocketId = onlineUsers.get(from);
-//       if (senderSocketId) {
-//         io.to(senderSocketId).emit("messages_seen", { chatId });
-//       }
-//     });
+    const senderSocketId = onlineUsers.get(from);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messages_seen", { chatId });
+      }
+    });
 
     // Disconnect
-    socket.on("disconnect", () => {
-      onlineUsers.delete(userId);
-      io.emit("online_users", Array.from(onlineUsers.keys()));
+    socket.on("disconnect", async () => {
+     onlineUsers.delete(userId);
+
+// update his contacts
+const user = await User.findById(userId).lean();
+const contacts: string[] = user?.contacts ?? [];
+
+contacts.forEach((contactId) => {
+  if (onlineUsers.has(contactId)) {
+    emitOnlineContacts(contactId);
+  }
+});
     });
   });
 };
