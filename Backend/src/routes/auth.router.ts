@@ -6,7 +6,7 @@ import { register, login } from "../controllers/auth.controller";
 const router = Router();
 
 const getFrontendUrl = (): string => {
-  return process.env.FRONTEND_URL || "http://localhost:3000";
+  return "https://chat-application-8kse.vercel.app";
 };
 
 router.post("/register", register);
